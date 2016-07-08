@@ -1,0 +1,11 @@
+; Hex-File to clear the bootloader settings
+; (c) 2014 by Arendi AG
+; -----------------------------------------
+; Address: 0x3FC00
+; Data: 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+;
+; At the address 0x3FC00 the bootloader stores its information. The first byte (0x01) marks that a valid application exists. The following two bytes are the CRC
+; the application is checked against to determine its validity. This hex-File writes these values to 0x00 which forces the bootloader to ignore the CRC check.
+:020000040003F7
+:10FC000001000000000000000000000000000000F3
+:00000001FF

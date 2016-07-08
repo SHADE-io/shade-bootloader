@@ -6,6 +6,9 @@ MAKEFILE_NAME := $(MAKEFILE_LIST)
 MAKEFILE_DIR := $(dir $(MAKEFILE_NAME) ) 
 
 TEMPLATE_PATH = ../../../../../../components/toolchain/gcc
+MERGE_HEX_PATH = C:/Program Files (x86)/Nordic Semiconductor/nrf5x/bin
+NRF_EXE_PATH = C:/Program Files (x86)/Nordic Semiconductor/Master Control Panel/3.10.0.14/nrf
+
 ifeq ($(OS),Windows_NT)
 include $(TEMPLATE_PATH)/Makefile.windows
 else
@@ -89,6 +92,10 @@ INC_PATHS += -I$(abspath ../../../../../../components/ble/common)
 OBJECT_DIRECTORY = _build
 LISTING_DIRECTORY = $(OBJECT_DIRECTORY)
 OUTPUT_BINARY_DIRECTORY = $(OBJECT_DIRECTORY)
+OUTPUT_FILENAME = nrf51422_xxac
+APP_VALID_FILENAME = BootloaderSettingsValidApplication
+BOOTLOADER_FILENAME = nrf51422_xxac
+BOOTLOADER_ZIP = ZIP_FOR_OTA
 
 # Sorting removes duplicates
 BUILD_DIRECTORIES := $(sort $(OBJECT_DIRECTORY) $(OUTPUT_BINARY_DIRECTORY) $(LISTING_DIRECTORY) )
@@ -130,7 +137,7 @@ ASMFLAGS += -D__HEAP_SIZE=0
 ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
 ASMFLAGS += -DBSP_DEFINES_ONLY
 #default target - first one defined
-default: clean nrf51422_xxac
+default: clean nrf51422_xxac merge_bootloader
 
 #building all targets
 all: clean
@@ -206,6 +213,14 @@ genhex:
 	@echo Preparing: $(OUTPUT_FILENAME).hex
 	$(NO_ECHO)$(OBJCOPY) -O ihex $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).out $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).hex
 
+merge_bootloader:
+	@echo Merging: $(BOOTLOADER_FILENAME).hex and $(APP_VALID_FILENAME).hex into $(OUTPUT_FILENAME).hex
+	$(MERGE_HEX_PATH)/mergehex.exe -m $(OBJECT_DIRECTORY)/$(BOOTLOADER_FILENAME).hex $(APP_VALID_FILENAME).hex -o $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).hex
+
+genzip:
+	@echo Preparing: $(BOOTLOADER_ZIP).zip
+	$(NRF_EXE_PATH)/nrfutil.exe dfu genpkg $(OUTPUT_BINARY_DIRECTORY)/$(BOOTLOADER_ZIP).zip --bootloader $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).hex --application-version 0xffff --dev-revision 0xffff --dev-type 0xffff --sd-req 0x0064
+	
 echosize:
 	-@echo ""
 	$(NO_ECHO)$(SIZE) $(OUTPUT_BINARY_DIRECTORY)/$(OUTPUT_FILENAME).out
