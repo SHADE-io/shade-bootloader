@@ -31,10 +31,10 @@ MEMORY
 SECTIONS
 {
   /* Ensures the bootloader settings are placed at the last flash page. */
-  .bootloaderSettings() :
+  .bootloaderSettings(NOLOAD) :
   {
 	
-  } > BOOTLOADER_SETTINGS 
+  } > BOOTLOADER_SETTINGS
 
   /* Ensures the Bootloader start address in flash is written to UICR when flashing the image. */
   .uicrBootStartAddress : 
